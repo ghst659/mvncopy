@@ -16,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
@@ -71,7 +72,7 @@ public class MavenCopy {
                 throw new IOException(target.toString());
             }
             System.err.format("visitFile(%s, %s)\n", file.toString(), target.toString());
-            copySed(file, target);
+            copyStred(file, target);
             return CONTINUE;
         }
         private Path pathSed(Path source) {
@@ -79,6 +80,11 @@ public class MavenCopy {
             String targetText = sed(sourceText);
             Path target = FileSystems.getDefault().getPath(targetText);
             return target;
+        }
+        private void copyStred(Path source, Path target) throws IOException {
+            Charset charset = Charset.forName("UTF-8");
+            Stream<CharSequence> outLines = Files.lines(source).map(this::sed);
+            Files.write(target, outLines::iterator, charset);
         }
         private void copySed(Path source, Path target) throws IOException {
             Charset charset = Charset.forName("UTF-8");
