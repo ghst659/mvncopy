@@ -39,7 +39,7 @@ public class MavenCopy {
             srcRoot = src;
             dstRoot = dst;
             map = table;
-            mapKeys = Pattern.compile("(" + String.join("|", map.keySet()) + ")");
+            mapKeys = Pattern.compile("\\b(" + String.join("|", map.keySet()) + ")\\b");
             System.err.format("Pattern: %s\n", mapKeys.toString());
         }
         @Override
@@ -82,9 +82,8 @@ public class MavenCopy {
             return target;
         }
         private void copyStred(Path source, Path target) throws IOException {
-            Charset charset = Charset.forName("UTF-8");
             Stream<CharSequence> outLines = Files.lines(source).map(this::sed);
-            Files.write(target, outLines::iterator, charset);
+            Files.write(target, outLines::iterator);
         }
         private void copySed(Path source, Path target) throws IOException {
             Charset charset = Charset.forName("UTF-8");
@@ -174,7 +173,7 @@ public class MavenCopy {
                 .dest("destination").required(true)
                 .help("Destination project directory.");
         parser.addArgument("--map").type(String.class).metavar("OLD=NEW")
-                .dest("map").nargs("*")
+                .dest("map").action(Arguments.append())
                 .help("Symbol replacement table.");
         parser.addArgument("--noop").action(Arguments.storeTrue())
                 .dest("noop")
